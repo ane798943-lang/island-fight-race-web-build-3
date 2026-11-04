@@ -1,0 +1,36 @@
+name: Build Island Fight Race web template (minimal)
+on: workflow_dispatch
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: mymindstorm/setup-emsdk@v14
+        with:
+          version: 4.0.20
+      - run: pip install scons
+      - name: Get Godot 4.7.2-stable source
+        run: git clone --depth 1 --branch 4.7.2-stable https://github.com/godotengine/godot.git godot-src
+      - name: Copy your saved compilation profile
+        run: cp custom_engine/ifr_web.build godot-src/ifr_web.build
+      - name: Build (only what Island Fight Race uses)
+        working-directory: godot-src
+        run: >
+          scons platform=web target=template_release threads=no dlink_enabled=no production=yes optimize=size
+          build_profile=ifr_web.build
+          module_enet_enabled=no module_upnp_enabled=no module_webrtc_enabled=no module_webxr_enabled=no
+          module_openxr_enabled=no module_mobile_vr_enabled=no module_theora_enabled=no module_csg_enabled=no
+          module_gridmap_enabled=no module_minimp3_enabled=no module_jsonrpc_enabled=no module_camera_enabled=no
+          module_gltf_enabled=no module_fbx_enabled=no module_basis_universal_enabled=no module_tinyexr_enabled=no
+          module_lightmapper_rd_enabled=no module_raycast_enabled=no module_xatlas_unwrap_enabled=no module_vhacd_enabled=no
+          module_text_server_adv_enabled=no module_text_server_fb_enabled=yes module_msdfgen_enabled=no
+          module_noise_enabled=no module_betsy_enabled=no module_glslang_enabled=no module_ktx_enabled=no
+          module_dds_enabled=no module_tga_enabled=no module_bmp_enabled=no module_hdr_enabled=no
+          module_meshoptimizer_enabled=no
+          module_godot_physics_3d_enabled=no module_godot_physics_2d_enabled=no
+          module_navigation_2d_enabled=no module_navigation_3d_enabled=no
+          module_zip_enabled=no module_regex_enabled=no
+      - uses: actions/upload-artifact@v4
+        with:
+          name: web-template-min
+          path: godot-src/bin/*.zip
